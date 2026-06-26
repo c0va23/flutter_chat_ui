@@ -87,6 +87,15 @@ class Composer extends StatefulWidget {
   /// Whether to enable autocorrect for the input field.
   final bool? autocorrect;
 
+  /// Spell-check configuration for the input field, forwarded verbatim to the
+  /// underlying [TextField]. Null leaves spell check disabled (the default).
+  final SpellCheckConfiguration? spellCheckConfiguration;
+
+  /// Builds the input field's context menu (the right-click / long-press
+  /// menu), forwarded verbatim to the underlying [TextField]. Null uses the
+  /// platform default menu.
+  final EditableTextContextMenuBuilder? contextMenuBuilder;
+
   /// Whether the input field should autofocus.
   final bool autofocus;
 
@@ -177,6 +186,8 @@ class Composer extends StatefulWidget {
     this.hintText = 'Type a message',
     this.keyboardAppearance,
     this.autocorrect,
+    this.spellCheckConfiguration,
+    this.contextMenuBuilder,
     this.autofocus = false,
     this.textCapitalization = TextCapitalization.sentences,
     this.keyboardType,
@@ -330,6 +341,11 @@ class _ComposerState extends State<Composer> {
                     textInputAction: widget.textInputAction,
                     keyboardAppearance: widget.keyboardAppearance,
                     autocorrect: widget.autocorrect ?? true,
+                    spellCheckConfiguration: widget.spellCheckConfiguration,
+                    // Fall back to the same default TextField uses, so a null
+                    // builder keeps the platform menu instead of removing it.
+                    contextMenuBuilder:
+                        widget.contextMenuBuilder ?? _defaultContextMenuBuilder,
                     autofocus: widget.autofocus,
                     textCapitalization: widget.textCapitalization,
                     keyboardType: widget.keyboardType,
@@ -425,4 +441,13 @@ class _ComposerState extends State<Composer> {
       _textController.clear();
     }
   }
+
+  // Mirrors TextField's own default context menu, used when no
+  // contextMenuBuilder is supplied so the platform menu is preserved.
+  static Widget _defaultContextMenuBuilder(
+    BuildContext context,
+    EditableTextState editableTextState,
+  ) => AdaptiveTextSelectionToolbar.editableText(
+    editableTextState: editableTextState,
+  );
 }
