@@ -54,6 +54,12 @@ class Composer extends StatefulWidget {
   /// Optional widget to display above the main composer row.
   final Widget? topWidget;
 
+  /// Optional widget to display below the main composer row, inside the same
+  /// background container. Useful for an action bar (attachment, send, hints)
+  /// placed *under* the text field rather than beside it, so the field's
+  /// border reflects only the editable region.
+  final Widget? bottomWidget;
+
   /// Whether to adjust padding for the bottom safe area.
   final bool? handleSafeArea;
 
@@ -175,6 +181,7 @@ class Composer extends StatefulWidget {
     ),
     this.filled = true,
     this.topWidget,
+    this.bottomWidget,
     this.handleSafeArea = true,
     this.backgroundColor,
     this.attachmentIconColor,
@@ -294,7 +301,9 @@ class _ComposerState extends State<Composer> {
         children: [
           if (widget.topWidget != null) widget.topWidget!,
           Padding(
-            padding: widget.handleSafeArea == true
+            // When a [bottomWidget] is present it is the lowest element, so the
+            // safe-area inset belongs to it (below), not to this field row.
+            padding: widget.handleSafeArea == true && widget.bottomWidget == null
                 ? (widget.padding?.add(
                         EdgeInsets.only(bottom: bottomSafeArea),
                       ) ??
@@ -395,6 +404,13 @@ class _ComposerState extends State<Composer> {
               ],
             ),
           ),
+          if (widget.bottomWidget != null)
+            Padding(
+              padding: widget.handleSafeArea == true
+                  ? EdgeInsets.only(bottom: bottomSafeArea)
+                  : EdgeInsets.zero,
+              child: widget.bottomWidget!,
+            ),
         ],
       ),
     );
